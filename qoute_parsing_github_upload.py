@@ -55,7 +55,6 @@ class Qoute_validation:
         max_num_of_words = 1000
         if (len(body_words) >= min_num_of_words and len(body_words) <= max_num_of_words):
             return True
-        
         else:
             return False
 
@@ -111,7 +110,7 @@ class Qoute_validation:
         qoute = self.qoute.strip()
 
         #title parsing.starting title is considerable. 
-        pattern = '^SQ\s*\d+'
+        pattern = r'^SQ\s*\d+'
         title_last_pos = -1
         title = ""
         match = re.search(pattern,qoute)
@@ -168,13 +167,14 @@ class Qoute_validation:
 
         date_first_pos ,date_last_pos, date =  0,0,""
         dates =[]
+        #print(s[ref_last_pos])
         for pattern in patterns:
-            dates += re.findall(pattern,s[ref_last_pos:])
+            dates += re.findall(pattern,self.qoute[ref_last_pos:])
         if len(dates) ==0:
             print("date not found after reference")
         else:
             date = dates[0]
-            match = re.search(date, s[ref_last_pos:])
+            match = re.search(date, self.qoute[ref_last_pos:])
             date_first_pos = match.start() +ref_last_pos
             date_last_pos = match.end()+ ref_last_pos
 
@@ -362,27 +362,30 @@ class Qoute_validation:
                             break
 
             place1 = place1.strip()
+            temp_place = place1
             place1 = place1.split("\n")
-            extra = "".join(place1[1:])
-            place = place1[0]
-            pos = place.find(".")
-            if pos!=-1:
-                extra = place[pos+1:]+extra
-                place = place[:pos]
+            if len(place1) == 1:
+                place_last_pos = place1[0].find(".")
+                if place_last_pos == -1:
+                    place_last_pos = len(place1[0])
+                    extra = ""
+                else:
+                    extra = place1[0][place_last_pos+1:]
+                place = place1[0][:place_last_pos]    
+            else:
+                place_last_pos = temp_place.find(".")
+                if place_last_pos == -1:
+                    place_last_pos = len(temp_place)
+                    extra = ""
+                else:
+                    extra = temp_place[place_last_pos+1:]
+                place = temp_place[:place_last_pos]
 
             if len(extra)>20:
-                print("invalid for extra words")
-                print(extra)
+                print("invalid for extra words",extra)
             place_last_pos = (len(place)+ self.qoute.rfind(place))
             ref =self.qoute[ref_first_pos:place_last_pos]
             
-        print("Title","\n","------","\n",title,"\n")
-        print("body","\n","------","\n",body,"\n")
-        print("reference","\n","------","\n",ref,"\n")
-        print("Name","\n","------","\n",name,"\n")
-        print("date","\n","------","\n",date,"\n")
-        print("place","\n","------","\n",place,"\n")
-
         return title,body,ref,name,date,place,extra
 
 
@@ -395,10 +398,27 @@ class Qoute_validation:
             return True
         else:
             return False
-s = """SQ 123
-we want  the   shelter of Lord 2 Jan 2078 Caitanya’s lotus . SQ 123 . feet,and thus we can taste the nectar all the time. >>> Ref. His Holiness Jayapatākā Swami Mahārāja on 28 Jun 2023 Śrī Māyāpur, India
->>> Ref. His Holiness Jayapatākā Swami Mahārā , Śrī Māyāpur, India date: 28 Jun 2023 
+s ="""SQ 123 
+we want  the   shelter of Lord 2 Jan 2078 Caitanya’s lotus >>> Ref. feet,and thus we can taste the nectar all the time.
+>>> Ref. His Holiness Jayapatākā Swami Mahārāja 28 Jun 2023
+place: Śrī Māyāpur, 
+India.Hare Krishna Hare Krishna Krishna Krishna Hare Hare Hare Ram Hare Ram Ram Ram Hare Hare"""
+s1="""SQ 123 
+we want  the   shelter of Lord 2 Jan 2078 Caitanya’s lotus >>> Ref. feet,and thus we can taste the nectar all the time.
+>>> Ref. His Holiness Jayapatākā Swami Mahārāja 28 Jun 2023
+place: Śrī Māyāpur, India . Hare Krishna Hare Krishna Krishna Krishna
+ Hare Hare Hare Ram Hare Ram Ram Ram Hare Hare . Iskon dhaka
 """
-ob = Qoute_validation(s)
+
+ob = Qoute_validation(s1)
 print(ob.is_valid)
+if ob.is_valid:
+
+    print("Title","\n","------","\n",ob.title,"\n")
+    print("body","\n","------","\n",ob.body,"\n")
+    print("reference","\n","------","\n",ob.reference,"\n")
+    print("Name","\n","------","\n",ob.name,"\n")
+    print("date","\n","------","\n",ob.date,"\n")
+    print("place","\n","------","\n",ob.place,"\n")
+    print("extra","\n","------","\n",ob.extra,"\n")
 
