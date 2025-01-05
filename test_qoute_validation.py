@@ -1,5 +1,5 @@
 import pytest
-import qoute_parsing_github_upload as QV
+import qoute_validation as QV
 
 @pytest.mark.parametrize("qoute,status", [
 ("""SQ 123 
