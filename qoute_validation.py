@@ -33,12 +33,22 @@ class Qoute_validation:
                 var3 = False
             if self.place_validity_check(self.place):
                 var4 = True
+               
             else:
                 var4 = False
+              
             if var1 and var2 and var3 and var4:
                
                 return True
             else:
+                if var1 == False:
+                    print("body and name not valid")
+                if var2 == False:
+                    print("date not valid")
+                if var3 == False:
+                    print("title not valid")
+                if var4 == False:
+                    print("place not valid")
                 return False
         except Exception as e:
             print(f"An error occurred during validation: {e}")
@@ -89,6 +99,9 @@ class Qoute_validation:
                     r'\b\d{1,2}\s\d{1,2}\s\d{4}\b',  # DD MM YYYY
                     r'\b\d{1,2}\s\d{1,2}\s\d{2}\b',  # DD MM YY
                     r'\b\d{2}\s\d{1,2}\s\d{1,2}\b',  # YY MM DD
+                    r'\b\d{1,2}\s(?:January|February|March|April|May|June|July|August|September|October|November|December),\s?\d{4}\b',
+                    r'\b\d{1,2}\s(?:January|February|March|April|May|June|July|August|September|October|November|December)\s,\s?\d{4}\b',
+                    
         ]
 
         # Find and print matches
@@ -102,6 +115,21 @@ class Qoute_validation:
     def title_validity_check(self,input_string):
         pattern = r'^SQ\s*\d+$'
         if re.search(pattern, input_string):
+            return True
+        else:
+            return False
+    # Function to validate a location
+    def place_validity_check(self,location_name):
+        #since geolocator module can not detect sri dham maypur
+        #it is solved by this way
+        pattern = r"sri\s*dham\s*mayapur"
+        match = re.search(pattern, location_name.lower())
+        if match:
+            return True
+        
+        geolocator = Nominatim(user_agent="location_validator",timeout=10)
+        location = geolocator.geocode(location_name)
+        if location:
             return True
         else:
             return False
@@ -163,11 +191,13 @@ class Qoute_validation:
                     r'\b\d{1,2}\s\d{1,2}\s\d{4}\b',  # DD MM YYYY
                     r'\b\d{1,2}\s\d{1,2}\s\d{2}\b',  # DD MM YY
                     r'\b\d{2}\s\d{1,2}\s\d{1,2}\b',  # YY MM DD
+                    r'\b\d{1,2}\s(?:January|February|March|April|May|June|July|August|September|October|November|December),\s?\d{4}\b',
+                     r'\b\d{1,2}\s(?:January|February|March|April|May|June|July|August|September|October|November|December)\s,\s?\d{4}\b',
                     ]
 
         date_first_pos ,date_last_pos, date =  0,0,""
         dates =[]
-        #print(s[ref_last_pos])
+        #print(self.qoute[ref_last_pos:])
         for pattern in patterns:
             dates += re.findall(pattern,self.qoute[ref_last_pos:])
         if len(dates) ==0:
@@ -389,20 +419,12 @@ class Qoute_validation:
         return title,body,ref,name,date,place,extra
 
 
-# Function to validate a location
-    def place_validity_check(self,location_name):
-        geolocator = Nominatim(user_agent="location_validator",timeout=10)
-        location = geolocator.geocode(location_name)
-        if location:
-            #print(f"Valid location: {location.address}")
-            return True
-        else:
-            return False
+
 s ="""SQ 123 
 we want  the   shelter of Lord 2 Jan 2078 Caitanya’s lotus >>> Ref. feet,and thus we can taste the nectar all the time.
->>> Ref. His Holiness Jayapatākā Swami Mahārāja 28 Jun 2023
-place: Śrī Māyāpur, 
-India.Hare Krishna Hare Krishna Krishna Krishna Hare Hare Hare Ram Hare Ram Ram Ram Hare Hare"""
+>>> Ref. His Holiness Jayapataka Swami
+Date: 24 December, 2022
+Place: Sridham Mayapur."""
 s1="""SQ 123 
 we want  the   shelter of Lord 2 Jan 2078 Caitanya’s lotus >>> Ref. feet,and thus we can taste the nectar all the time.
 >>> Ref. His Holiness Jayapatākā Swami Mahārāja 28 Jun 2023
@@ -410,7 +432,11 @@ place: Śrī Māyāpur, India . Hare Krishna Hare Krishna Krishna Krishna
  Hare Hare Hare Ram Hare Ram Ram Ram Hare Hare . Iskon dhaka
 """
 
-ob = Qoute_validation(s1)
+
+
+
+
+ob = Qoute_validation(s)
 print(ob.is_valid)
 if ob.is_valid:
 
